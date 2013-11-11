@@ -2,13 +2,13 @@ part of tuple;
 
 
 class Tuple3<T1,T2, T3> extends Tuple {
-  final T1 item1;
-  final T2 item2;
-  final T3 item3;
+  final T1 $1;
+  final T2 $2;
+  final T3 $3;
   
-  List get _items => [item1, item2, item3];
+  List get _items => [$1, $2, $3];
   
-  const Tuple3(T1 this.item1, T2 this.item2, T3 this.item3);
+  const Tuple3(T1 this.$1, T2 this.$2, T3 this.$3);
  
   Tuple project([int ord1, int ord2, int ord3]) {
     var ords = new List<int>();
