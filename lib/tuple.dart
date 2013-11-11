@@ -7,88 +7,65 @@ part 'src/tuple0.dart';
 part 'src/tuple1.dart';
 part 'src/tuple2.dart';
 part 'src/tuple3.dart';
+part 'src/tuple4.dart';
+part 'src/tuple5.dart';
 part 'src/zipped.dart';
 
-/**
- * zips a list of iterables into an iterable of tuples.
- * 
- * If [:expand:] is `true`, if any of the iterables is an iterable of tuples,
- * the iterable will be expanded into it's projections.
- * 
- * eg.
- *     var iter1 = [new Tuple2(4,5), new Tuple2(4,5), new Tuple2(4,5)]
- *     var iter2 = [6, 6, 6]
- *     var iter3 = zip([iter1, iter2], expand: true).toList();
- *     // => iter3 = [<4,5,6>,<4,5,6>,<4,5,6>]
- */
-ZippedIterable zip(List<Iterable> iterables, {bool expand: false}) {
-  if (expand) {
-    iterables = iterables.expand(_expandIterable).toList();
+
+
+Iterable<Tuple> zip([Iterable iter1, Iterable iter2, Iterable iter3, Iterable iter4, Iterable iter5]) {
+  List<Iterable> iterables;
+  if (iter1 == null) {
+    return new ZippedIterable0._(iterables);
   }
-  switch(iterables.length) {
-    case 0: return new ZippedIterable0._();
-    case 1: return new ZippedIterable1._(iterables[0]);
-    case 2: return new ZippedIterable2._(iterables[0], iterables[1]);
-    case 3: return new ZippedIterable3._(iterables[0], iterables[1], iterables[2]);
-    default:
-      throw "Tuples with length >= 3 not implemented";
+  iterables.add(iter1);
+  if (iter2 == null) {
+    return new ZippedIterable1._(iterables);
   }
+  iterables.add(iter2);
+  if (iter3 == null) {
+    return new ZippedIterable2._(iterables);
+  }
+  iterables.add(iter3);
+  if (iter4 == null) {
+    return new ZippedIterable3._(iterables);
+  }
+  iterables.add(iter4);
+  if (iter5 == null) {
+    return new ZippedIterable4._(iterables);
+  }
+  return new ZippedIterable5._(iterables);
 }
 
-List<dynamic> _expandTuple(Tuple t) {
-  if (t is Tuple0) return [];
-  if (t is Tuple1) return [(t as Tuple1).item1];
-  if (t is Tuple2) return [(t as Tuple2).item2, (t as Tuple2).item2];
-  if (t is Tuple3) return [(t as Tuple3).item1, (t as Tuple2).item2, (t as Tuple3).item3];
-}
-
-List<Iterable> _expandIterable(Iterable iter) {
-  if (iter is Iterable<Tuple0>) return [];
-  if (iter is Iterable<Tuple1>) return [iter.map((i) => i.item1)];
-  if (iter is Iterable<Tuple2>) return [iter.map((i) => i.item1), iter.map((i) => i.item2)];
-  if (iter is Iterable<Tuple3>) return [iter.map((i) => i.item1), iter.map((i) => i.item2), iter.map((i) => i.item3)];
-}
 
 abstract class Tuple {
   const Tuple();
-  
   List get _items;
-  dynamic _project(int i) => _items[i];
+  int get _length => _items.length;
   
-  factory Tuple.fromItems(List<dynamic> items, {expand: false}) {
-    if (expand) {
-      items = items.expand(_expandTuple).toList();
+  Tuple _project(List<int> ords) {
+    for (var ord in ords) {
+      if (ord >= _items.length)
+        throw new RangeError("Invalid ordinate $ord for ${this.runtimeType}");
     }
-    switch (items.length) {
+    final s = _items;
+    switch(ords.length) {
       case 0: return new Tuple0();
-      case 1: return new Tuple1(items[0]);
-      case 2: return new Tuple2(items[0], items[1]);
-      case 3: return new Tuple3(items[0], items[1], items[2]);
-      default:
-        throw "Tuples with length >= 3 not implemented";
+      case 1: return new Tuple1(s[ords[0]]);
+      case 2: return new Tuple2(s[ords[0]], s[ords[1]]);
+      case 3: return new Tuple3(s[ords[0]], s[ords[1]], s[ords[2]]);
+      case 4: return new Tuple4(s[ords[0]], s[ords[1]], s[ords[2]], s[ords[3]]);
+      case 5: return new Tuple5(s[ords[0]], s[ords[1]], s[ords[2]], s[ords[3]], s[ords[4]]);
     }
   }
   
-  bool operator ==(Object o) {
-    if (o is Tuple) {
-      var tup = (o as Tuple);
-      if (_items.length != tup._items.length) return false;
-      return range(_items.length)
-          .every((i) => _items[i] == tup._items[i]);
-    }
-    return false;
-  }
+  bool operator ==(Object o) => o is Tuple
+                             && o._length == _length
+                             && range(_length).every((i) => _items[i] == o._items[i]);
   
-  int get hashCode {
-    int result = 57;
-    for (var i in _items) {
-      result = result * 57 + i.hashCode;
-    }
-    return result;
-  }
-  
-  String toString() => "<${_items.join(", ")}>";
+  int get hashCode => _items.fold(7, (h, i) => h * 7 + i.hashCode);
 }
+
 
 
 
